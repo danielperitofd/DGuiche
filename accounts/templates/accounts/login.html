@@ -1,0 +1,35 @@
+﻿{% extends 'base.html' %}
+{% block title %}Login | AgendM{% endblock %}
+{% block content %}
+<div class="row justify-content-center align-items-center min-vh-100 py-5">
+    <div class="col-12 col-md-8 col-lg-5">
+        <div class="card border-0 shadow-lg login-card">
+            <div class="card-body p-4 p-lg-5">
+                <div class="mb-4">
+                    <div class="eyebrow mb-2">SaaS Multi-tenant</div>
+                    <h1 class="h3 mb-2">Fluxo inteligente de atendimento</h1>
+                    <p class="text-secondary mb-0">Fila por horário, atraso, encaixe e operação por guichê.</p>
+                </div>
+                <form method="post" class="row g-3">
+                    {% csrf_token %}
+                    <div class="col-12">
+                        <label class="form-label">{{ form.username.label }}</label>
+                        {{ form.username }}
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">{{ form.password.label }}</label>
+                        {{ form.password }}
+                    </div>
+                    <div class="col-12 d-grid">
+                        <button class="btn btn-success btn-lg">Entrar</button>
+                    </div>
+                </form>
+                <div class="mt-4 small text-secondary">
+                    Superusuário inicial: <strong>demasantosdev</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

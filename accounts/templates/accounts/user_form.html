@@ -1,0 +1,28 @@
+﻿{% extends 'base.html' %}
+{% block title %}Usuário | AgendM{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-xl-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+                <h1 class="h4 mb-4">Cadastro de usuário</h1>
+                <form method="post" class="row g-3">
+                    {% csrf_token %}
+                    {% for field in form %}
+                    <div class="col-md-6">
+                        <label class="form-label">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.errors %}<div class="text-danger small">{{ field.errors|join:', ' }}</div>{% endif %}
+                    </div>
+                    {% endfor %}
+                    <div class="col-12 d-flex justify-content-end gap-2">
+                        <a href="{% url 'accounts:list' %}" class="btn btn-outline-secondary">Cancelar</a>
+                        <button class="btn btn-success"><i class="bi bi-check2"></i> Salvar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

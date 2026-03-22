@@ -1,0 +1,63 @@
+﻿{% extends 'base.html' %}
+{% block title %}Nova importacao | AgendM{% endblock %}
+{% block content %}
+<div class="row g-4">
+    <div class="col-12 col-xl-7">
+        <div class="card border-0 shadow-sm"><div class="card-body p-4">
+            <h1 class="h4 mb-4">Upload da planilha</h1>
+            <form method="post" enctype="multipart/form-data" class="row g-3">{% csrf_token %}
+                {{ form.action }}
+                {{ form.temp_file }}
+                <div class="col-12">
+                    <label class="form-label">Arquivo</label>
+                    {{ form.arquivo }}
+                    {% if form.arquivo.errors %}<div class="text-danger small">{{ form.arquivo.errors|join:', ' }}</div>{% endif %}
+                </div>
+                <div class="col-12">
+                    <label class="form-label">Data de referencia</label>
+                    {{ form.data_referencia }}
+                    {% if form.data_referencia.errors %}<div class="text-danger small">{{ form.data_referencia.errors|join:', ' }}</div>{% endif %}
+                    <div class="form-text">A data e preenchida automaticamente quando a planilha traz o campo "Agenda do dia".</div>
+                </div>
+                <div class="col-12 d-flex justify-content-end gap-2">
+                    <a href="{% url 'importacao:list' %}" class="btn btn-outline-secondary">Cancelar</a>
+                    {% if preview %}
+                    <button class="btn btn-success" name="action" value="confirm"><i class="bi bi-check2"></i> Confirmar importacao</button>
+                    {% else %}
+                    <button class="btn btn-success" name="action" value="preview"><i class="bi bi-search"></i> Pre-visualizar</button>
+                    {% endif %}
+                </div>
+            </form>
+        </div></div>
+    </div>
+    <div class="col-12 col-xl-5">
+        <div class="card border-0 shadow-sm bg-light h-100"><div class="card-body p-4">
+            <h2 class="h5 mb-3">Formato suportado</h2>
+            <ul class="mb-0 text-secondary">
+                <li>Arquivos `.xls`, `.xlsx` e `.csv`.</li>
+                <li>Cabecalho governamental: Hora, Eleitor, CPF/Titulo, Email, Telefone e Tipo de Servico.</li>
+                <li>Linhas `Total do Horario` e `Total` sao ignoradas.</li>
+                <li>Status e guiche sao internos do sistema.</li>
+            </ul>
+        </div></div>
+    </div>
+</div>
+{% if preview %}
+<div class="row g-4 mt-1">
+    <div class="col-12 col-xl-4">
+        <div class="card border-0 shadow-sm"><div class="card-body p-4">
+            <h2 class="h5 mb-3">Resumo da pre-visualizacao</h2>
+            <div class="small text-secondary mb-2">Planilha: {{ preview.metadata.sheet_name|default:'Arquivo importado' }}</div>
+            <div class="small text-secondary mb-2">Data detectada: {{ preview.metadata.agenda_data|date:'d/m/Y'|default:'Nao encontrada' }}</div>
+            <div class="small text-secondary mb-2">Linhas elegiveis: {{ preview.metadata.row_count }}</div>
+            <div class="small text-secondary">Colunas: {{ preview.metadata.headers|join:', ' }}</div>
+        </div></div>
+    </div>
+    <div class="col-12 col-xl-8">
+        <div class="card border-0 shadow-sm"><div class="card-body p-0">
+            <div class="table-responsive"><table class="table align-middle mb-0"><thead><tr><th>Hora</th><th>Eleitor</th><th>Documento</th><th>Telefone</th><th>Servico</th></tr></thead><tbody>{% for row in preview.rows %}<tr><td>{{ row.hora }}</td><td>{{ row.nome }}<div class="small text-secondary">{{ row.email }}</div></td><td>{{ row.documento|default:'-' }}</td><td>{{ row.telefone|default:'-' }}</td><td>{{ row.tipo_servico|default:'-' }}</td></tr>{% endfor %}</tbody></table></div>
+        </div></div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

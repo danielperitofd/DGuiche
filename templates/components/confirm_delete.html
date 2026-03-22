@@ -1,0 +1,14 @@
+﻿{% extends 'base.html' %}
+{% block title %}Confirmar exclusao | AgendM{% endblock %}
+{% block content %}
+<div class="row justify-content-center"><div class="col-12 col-lg-6"><div class="card border-0 shadow-sm"><div class="card-body p-4">
+    <h1 class="h4 mb-3">{{ title|default:'Confirmar exclusao' }}</h1>
+    <p class="text-secondary">Esta acao removera <strong>{{ object }}</strong>.</p>
+    <form method="post">{% csrf_token %}
+        <div class="d-flex justify-content-end gap-2">
+            <a href="{{ cancel_url }}" class="btn btn-outline-secondary">Cancelar</a>
+            <button class="btn btn-danger"><i class="bi bi-trash"></i> Excluir</button>
+        </div>
+    </form>
+</div></div></div></div>
+{% endblock %}

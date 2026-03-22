@@ -1,0 +1,23 @@
+﻿{% extends 'base.html' %}
+{% block title %}Detalhes da importacao | AgendM{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 gap-3">
+    <div>
+        <h1 class="h3 mb-1">Resultado da importacao</h1>
+        <p class="text-secondary mb-0">Data de referencia {{ importacao.data_referencia|date:'d/m/Y' }} | {{ importacao.criado_em|date:'d/m/Y H:i' }}</p>
+    </div>
+    <div class="d-flex gap-2">
+        <form method="post" action="{% url 'importacao:reprocess' importacao.pk %}">{% csrf_token %}<button class="btn btn-outline-success">Reprocessar</button></form>
+        <a href="{% url 'importacao:list' %}" class="btn btn-outline-secondary">Voltar</a>
+    </div>
+</div>
+<div class="row row-cols-1 row-cols-md-2 row-cols-xl-4 g-4 mb-4">
+    {% include 'components/metric_card.html' with label='Inseridos' value=importacao.inseridos icon='bi-plus-circle' %}
+    {% include 'components/metric_card.html' with label='Atualizados' value=importacao.atualizados icon='bi-arrow-repeat' %}
+    {% include 'components/metric_card.html' with label='Preservados' value=importacao.preservados icon='bi-shield-check' %}
+    {% include 'components/metric_card.html' with label='Ignorados' value=importacao.ignorados icon='bi-slash-circle' %}
+</div>
+<div class="card border-0 shadow-sm mb-4"><div class="card-body p-4"><h2 class="h5 mb-3">Resumo por resultado</h2><div class="d-flex flex-wrap gap-2">{% for item in resumo_resultados %}<span class="badge text-bg-light border">{{ item.resultado }}: {{ item.total }}</span>{% empty %}<span class="text-secondary">Sem registros.</span>{% endfor %}</div></div></div>
+<div class="card border-0 shadow-sm mb-4"><div class="card-body"><form method="get" class="row g-3"><div class="col-12 col-md-4"><label class="form-label">Nome</label>{{ filter_form.nome }}</div><div class="col-12 col-md-4"><label class="form-label">Resultado</label>{{ filter_form.resultado }}</div><div class="col-12 col-md-2"><label class="form-label">Linha</label>{{ filter_form.linha }}</div><div class="col-12 col-md-2 d-flex align-items-end"><button class="btn btn-outline-success w-100">Filtrar</button></div></form></div></div>
+<div class="card border-0 shadow-sm"><div class="table-responsive"><table class="table align-middle mb-0"><thead><tr><th>Linha</th><th>Hora</th><th>Nome</th><th>Origem</th><th>Resultado</th><th>Detalhe</th></tr></thead><tbody>{% for item in registros %}<tr><td>{{ item.linha }}</td><td>{{ item.hora|time:'H:i'|default:'--:--' }}</td><td>{{ item.nome }}<div class="small text-secondary">{{ item.observacao|default:'' }}</div></td><td><div class="small">Status: {{ item.status_origem|default:'-' }}</div><div class="small text-secondary">Guiche: {{ item.guiche_origem|default:'-' }}</div></td><td><span class="badge {% if item.resultado == 'inserido' %}text-bg-success{% elif item.resultado == 'atualizado' %}text-bg-primary{% elif item.resultado == 'preservado' %}text-bg-warning{% else %}text-bg-secondary{% endif %}">{{ item.get_resultado_display }}</span></td><td>{{ item.detalhe }}</td></tr>{% empty %}<tr><td colspan="6" class="text-center py-4 text-secondary">Nenhum registro encontrado.</td></tr>{% endfor %}</tbody></table></div></div>
+{% endblock %}

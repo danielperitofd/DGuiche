@@ -1,0 +1,101 @@
+﻿:root {
+    --app-green: #1f8f57;
+    --app-green-dark: #13663d;
+    --app-gray: #6b7280;
+    --app-border: #e7eaee;
+    --app-bg: #f6f8f7;
+}
+
+body {
+    background: linear-gradient(180deg, #ffffff 0%, #f6faf8 100%);
+    color: #15202b;
+}
+
+.app-navbar {
+    background: rgba(255,255,255,.94);
+    backdrop-filter: blur(12px);
+}
+
+.navbar-brand {
+    color: var(--app-green-dark);
+    letter-spacing: .02em;
+}
+
+.eyebrow {
+    text-transform: uppercase;
+    color: var(--app-green);
+    font-weight: 700;
+    font-size: .76rem;
+    letter-spacing: .08em;
+}
+
+.card, .queue-card, .login-card {
+    border-radius: 1rem;
+}
+
+.metric-card {
+    background: #fff;
+}
+
+.metric-icon {
+    font-size: 1.8rem;
+    color: var(--app-green);
+}
+
+.now-calling-card {
+    background: linear-gradient(135deg, #effaf4 0%, #ffffff 100%);
+}
+
+.queue-card {
+    background: #fbfcfc;
+    border: 1px solid var(--app-border);
+    border-radius: 1rem;
+}
+
+.tenant-pill {
+    background: #eef5f1;
+    color: var(--app-green-dark);
+    border-radius: 999px;
+    padding: .35rem .8rem;
+    font-size: .82rem;
+    font-weight: 600;
+}
+
+.form-control, .form-select {
+    border-radius: .85rem;
+    border-color: var(--app-border);
+    min-height: 46px;
+}
+
+.btn {
+    border-radius: .85rem;
+}
+
+.btn-success {
+    background: var(--app-green);
+    border-color: var(--app-green);
+}
+
+.btn-success:hover {
+    background: var(--app-green-dark);
+    border-color: var(--app-green-dark);
+}
+
+.table thead th {
+    background: #f8faf9;
+    color: var(--app-gray);
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.list-group-item {
+    border-color: var(--app-border);
+}
+
+@media (max-width: 991.98px) {
+    .container-fluid {
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+    }
+}
+
