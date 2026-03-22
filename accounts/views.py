@@ -1,12 +1,13 @@
 ﻿from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.views import LogoutView
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
-from django.contrib.auth.views import LogoutView
 from django.views.generic import CreateView, DeleteView, ListView, UpdateView
 
 from accounts.forms import UserForm
 from accounts.models import User
-from core.mixins import TenantContextMixin
+from core.mixins import TenantContextMixin, TenantManagementRequiredMixin
 
 
 def login_view(request):
@@ -33,7 +34,7 @@ class SaaSLogoutView(LogoutView):
     pass
 
 
-class UserListView(TenantContextMixin, ListView):
+class UserListView(TenantManagementRequiredMixin, TenantContextMixin, ListView):
     model = User
     template_name = "accounts/user_list.html"
     context_object_name = "users"
@@ -45,7 +46,7 @@ class UserListView(TenantContextMixin, ListView):
         return queryset.filter(tenant=self.request.user.tenant).order_by("username")
 
 
-class UserCreateView(TenantContextMixin, CreateView):
+class UserCreateView(TenantManagementRequiredMixin, TenantContextMixin, CreateView):
     model = User
     form_class = UserForm
     template_name = "accounts/user_form.html"
@@ -64,7 +65,7 @@ class UserCreateView(TenantContextMixin, CreateView):
         return super().form_valid(form)
 
 
-class UserUpdateView(TenantContextMixin, UpdateView):
+class UserUpdateView(TenantManagementRequiredMixin, TenantContextMixin, UpdateView):
     model = User
     form_class = UserForm
     template_name = "accounts/user_form.html"
@@ -89,7 +90,7 @@ class UserUpdateView(TenantContextMixin, UpdateView):
         return super().form_valid(form)
 
 
-class UserDeleteView(TenantContextMixin, DeleteView):
+class UserDeleteView(TenantManagementRequiredMixin, TenantContextMixin, DeleteView):
     model = User
     template_name = "components/confirm_delete.html"
     success_url = reverse_lazy("accounts:list")
@@ -109,4 +110,30 @@ class UserDeleteView(TenantContextMixin, DeleteView):
         context["title"] = "Excluir usuario"
         context["cancel_url"] = reverse_lazy("accounts:list")
         return context
+
+
+@login_required
+def start_common_preview(request):
+    user = request.user
+    if request.method == "POST" and user.is_staff and not user.is_global_master and user.tenant_id:
+        request.session["staff_preview_mode"] = "common"
+        guiche_id = request.POST.get("guiche_id")
+        guiche = user.tenant.guiches.filter(pk=guiche_id).first() if guiche_id else None
+        if guiche:
+            request.session["staff_preview_guiche_id"] = guiche.pk
+        elif user.guiche_id:
+            request.session["staff_preview_guiche_id"] = user.guiche_id
+        else:
+            request.session.pop("staff_preview_guiche_id", None)
+        messages.info(request, "Pre-visualizacao de operador ativada.")
+    return redirect(request.POST.get("next") or "dashboard:home")
+
+
+@login_required
+def stop_common_preview(request):
+    if request.method == "POST":
+        request.session.pop("staff_preview_mode", None)
+        request.session.pop("staff_preview_guiche_id", None)
+        messages.info(request, "Pre-visualizacao de operador desativada.")
+    return redirect(request.POST.get("next") or "dashboard:home")
 

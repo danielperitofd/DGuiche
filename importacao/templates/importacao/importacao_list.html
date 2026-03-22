@@ -1,9 +1,31 @@
 ﻿{% extends 'base.html' %}
-{% block title %}Importacoes | AgendM{% endblock %}
+{% block title %}Importações | AgendM{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div><h1 class="h3 mb-1">Importacao de planilha</h1><p class="text-secondary mb-0">Upload incremental com preservacao de chamados e atendidos.</p></div>
-    <a href="{% url 'importacao:create' %}" class="btn btn-success"><i class="bi bi-plus-lg"></i> Nova importacao</a>
+<div class="section-header">
+    <div><h1 class="section-title">Importação de planilha</h1><p class="section-subtitle">Upload incremental com preservação de chamados e atendidos.</p></div>
+    <a href="{% url 'importacao:create' %}" class="btn btn-success"><i class="bi bi-plus-lg"></i> Nova importação</a>
 </div>
-<div class="card border-0 shadow-sm"><div class="table-responsive"><table class="table align-middle mb-0"><thead><tr><th>Data referencia</th><th>Inseridos</th><th>Atualizados</th><th>Preservados</th><th>Ignorados</th><th>Quando</th><th></th></tr></thead><tbody>{% for item in importacoes %}<tr><td>{{ item.data_referencia|date:'d/m/Y' }}</td><td>{{ item.inseridos }}</td><td>{{ item.atualizados }}</td><td>{{ item.preservados }}</td><td>{{ item.ignorados }}</td><td>{{ item.criado_em|date:'d/m/Y H:i' }}</td><td class="text-end"><a href="{% url 'importacao:detail' item.pk %}" class="btn btn-sm btn-outline-secondary">Detalhes</a></td></tr>{% empty %}<tr><td colspan="7" class="text-center py-4 text-secondary">Nenhuma importacao realizada.</td></tr>{% endfor %}</tbody></table></div></div>
+<div class="card border-0 shadow-sm">
+    <div class="table-responsive">
+        <table class="table align-middle mb-0">
+            <thead><tr><th>Data referência</th><th>Inseridos</th><th>Atualizados</th><th>Preservados</th><th>Ignorados</th><th>Quando</th><th></th></tr></thead>
+            <tbody>
+                {% for item in importacoes %}
+                <tr>
+                    <td>{{ item.data_referencia|date:'d/m/Y' }}</td>
+                    <td>{{ item.inseridos }}</td>
+                    <td>{{ item.atualizados }}</td>
+                    <td>{{ item.preservados }}</td>
+                    <td>{{ item.ignorados }}</td>
+                    <td>{{ item.criado_em|date:'d/m/Y H:i' }}</td>
+                    <td class="text-end"><a href="{% url 'importacao:detail' item.pk %}" class="btn btn-sm btn-outline-secondary">Detalhes</a></td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="7" class="text-center py-4 text-secondary">Nenhuma importação realizada.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
 {% endblock %}
+

@@ -5,12 +5,13 @@ from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import DetailView, ListView, View
 
+from core.mixins import TenantManagementRequiredMixin
 from importacao.forms import ImportacaoDetailFilterForm, ImportacaoPlanilhaForm
 from importacao.models import ImportacaoPlanilha
 from importacao.services import create_import_from_temp, preview_import_file, reprocessar_importacao, save_temp_upload
 
 
-class ImportacaoListView(LoginRequiredMixin, ListView):
+class ImportacaoListView(TenantManagementRequiredMixin, LoginRequiredMixin, ListView):
     model = ImportacaoPlanilha
     template_name = "importacao/importacao_list.html"
     context_object_name = "importacoes"
@@ -19,7 +20,7 @@ class ImportacaoListView(LoginRequiredMixin, ListView):
         return ImportacaoPlanilha.objects.filter(tenant=self.request.user.tenant).order_by("-criado_em")
 
 
-class ImportacaoCreateView(LoginRequiredMixin, View):
+class ImportacaoCreateView(TenantManagementRequiredMixin, LoginRequiredMixin, View):
     template_name = "importacao/importacao_form.html"
     success_url = reverse_lazy("importacao:list")
 
@@ -65,7 +66,7 @@ class ImportacaoCreateView(LoginRequiredMixin, View):
             return render(request, self.template_name, {"form": form, "preview": None})
 
 
-class ImportacaoDetailView(LoginRequiredMixin, DetailView):
+class ImportacaoDetailView(TenantManagementRequiredMixin, LoginRequiredMixin, DetailView):
     model = ImportacaoPlanilha
     template_name = "importacao/importacao_detail.html"
     context_object_name = "importacao"
@@ -96,9 +97,10 @@ class ImportacaoDetailView(LoginRequiredMixin, DetailView):
         return context
 
 
-class ImportacaoReprocessView(LoginRequiredMixin, View):
+class ImportacaoReprocessView(TenantManagementRequiredMixin, LoginRequiredMixin, View):
     def post(self, request, pk):
         origem = ImportacaoPlanilha.objects.filter(tenant=request.user.tenant).get(pk=pk)
         nova = reprocessar_importacao(origem, request.user)
         messages.success(request, f"Importacao reprocessada. Nova execucao #{nova.pk} criada com inseridos={nova.inseridos}, atualizados={nova.atualizados}, preservados={nova.preservados}, ignorados={nova.ignorados}.")
         return redirect("importacao:detail", pk=nova.pk)
+

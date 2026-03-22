@@ -12,7 +12,7 @@
 <body>
 {% if user.is_authenticated %}
 <nav class="navbar navbar-expand-lg app-navbar sticky-top border-bottom">
-    <div class="container-fluid px-4">
+    <div class="container-fluid app-shell">
         <a class="navbar-brand fw-semibold" href="{% url 'dashboard:home' %}">AgendM</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
             <span class="navbar-toggler-icon"></span>
@@ -21,26 +21,54 @@
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 <li class="nav-item"><a class="nav-link" href="{% url 'dashboard:home' %}">Dashboard</a></li>
                 {% if not is_global_master %}
-                <li class="nav-item"><a class="nav-link" href="{% url 'importacao:list' %}">Importação</a></li>
                 <li class="nav-item"><a class="nav-link" href="{% url 'atendimento:list' %}">Fila</a></li>
+                {% if can_manage_tenant %}
+                <li class="nav-item"><a class="nav-link" href="{% url 'importacao:list' %}">Importação</a></li>
                 <li class="nav-item"><a class="nav-link" href="{% url 'guiches:list' %}">Guichês</a></li>
                 {% endif %}
+                {% endif %}
+                {% if can_manage_tenant %}
                 <li class="nav-item"><a class="nav-link" href="{% url 'accounts:list' %}">Usuários</a></li>
+                {% endif %}
                 {% if is_global_master %}
                 <li class="nav-item"><a class="nav-link" href="{% url 'tenants:list' %}">Tenants</a></li>
                 {% endif %}
             </ul>
-            <div class="d-flex align-items-center gap-3 small text-secondary">
+            <div class="d-flex flex-wrap align-items-center justify-content-end gap-2 small text-secondary app-toolbar">
+                {% if user.is_staff and not is_global_master and current_tenant %}
+                    {% if preview_mode %}
+                    <span class="tenant-pill tenant-pill--warning">Modo operador</span>
+                    {% else %}
+                    <form method="post" action="{% url 'accounts:preview_common' %}" class="d-flex flex-wrap align-items-center gap-2">
+                        {% csrf_token %}
+                        <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                        <select name="guiche_id" class="form-select form-select-sm app-select-inline">
+                            <option value="">Sem guichê</option>
+                            {% for item in current_tenant.guiches.all %}
+                            <option value="{{ item.pk }}" {% if effective_guiche and effective_guiche.pk == item.pk %}selected{% endif %}>{{ item.codigo }} - {{ item.nome }}</option>
+                            {% endfor %}
+                        </select>
+                        <button class="btn btn-sm btn-outline-dark">Ver como operador</button>
+                    </form>
+                    {% endif %}
+                {% endif %}
                 {% if current_tenant %}<span class="tenant-pill">{{ current_tenant.nome }}</span>{% endif %}
-                {% if user.guiche and not is_global_master %}<span class="tenant-pill">Guichê {{ user.guiche.codigo }}</span>{% endif %}
+                {% if effective_guiche and not is_global_master %}<span class="tenant-pill">Guichê {{ effective_guiche.codigo }}</span>{% endif %}
                 <span>{{ user.username }}</span>
+                {% if preview_mode %}
+                <form method="post" action="{% url 'accounts:preview_normal' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                    <button class="btn btn-sm btn-dark">Sair da prévia</button>
+                </form>
+                {% endif %}
                 <form method="post" action="{% url 'accounts:logout' %}">{% csrf_token %}<button class="btn btn-sm btn-outline-secondary">Sair</button></form>
             </div>
         </div>
     </div>
 </nav>
 {% endif %}
-<div class="container-fluid px-4 py-4">
+<div class="container-fluid app-shell app-content">
     {% if messages %}
     <div class="mb-3">
         {% for message in messages %}

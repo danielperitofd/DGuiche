@@ -2,102 +2,165 @@
 {% block title %}Dashboard | AgendM{% endblock %}
 {% block content %}
 {% if master_mode %}
-<div class="row g-4 mb-4">
+<div class="section-header">
+    <div>
+        <div class="eyebrow mb-2">Visão global</div>
+        <h1 class="section-title">Resumo da plataforma</h1>
+        <p class="section-subtitle">Clientes, usuários e status centralizados em uma única grade.</p>
+    </div>
+</div>
+<div class="row row-cols-1 row-cols-md-3 g-3 mb-3 row-tight">
     {% include 'components/metric_card.html' with label='Tenants' value=total_tenants icon='bi-buildings' %}
     {% include 'components/metric_card.html' with label='Tenants ativas' value=tenants_ativos icon='bi-check2-square' %}
     {% include 'components/metric_card.html' with label='Usuários' value=total_usuarios icon='bi-people' %}
 </div>
-<div class="card border-0 shadow-sm"><div class="card-body"><h1 class="h4 mb-3">Visão global</h1><div class="table-responsive"><table class="table align-middle mb-0"><thead><tr><th>Tenant</th><th>Código</th><th>Status</th></tr></thead><tbody>{% for tenant in tenants %}<tr><td>{{ tenant.nome }}</td><td>{{ tenant.codigo }}</td><td>{% if tenant.ativo %}<span class="badge text-bg-success">Ativa</span>{% else %}<span class="badge text-bg-secondary">Inativa</span>{% endif %}</td></tr>{% endfor %}</tbody></table></div></div></div>
-{% else %}
-<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
-    <div>
-        <div class="eyebrow mb-2">Operação {{ tenant.nome }}</div>
-        <h1 class="h3 mb-1">Dashboard de atendimento</h1>
-        <p class="text-secondary mb-0">Importação incremental, fila inteligente e operação por guichê.</p>
-    </div>
-    <div class="d-flex gap-2">
-        <a href="{% url 'importacao:create' %}" class="btn btn-success">Importar planilha</a>
-        <a href="{% url 'atendimento:painel' %}" class="btn btn-outline-dark" target="_blank">Painel de chamada</a>
-        {% if user.guiche %}<form method="post" action="{% url 'atendimento:chamar_proximo' %}">{% csrf_token %}<button class="btn btn-dark">Chamar próximo</button></form>{% endif %}
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead>
+                    <tr><th>Tenant</th><th>Código</th><th>Status</th></tr>
+                </thead>
+                <tbody>
+                    {% for tenant in tenants %}
+                    <tr>
+                        <td>{{ tenant.nome }}</td>
+                        <td>{{ tenant.codigo }}</td>
+                        <td>{% if tenant.ativo %}<span class="badge text-bg-success">Ativa</span>{% else %}<span class="badge text-bg-secondary">Inativa</span>{% endif %}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
-<div class="row row-cols-1 row-cols-md-2 row-cols-xl-4 g-4 mb-4">
+{% else %}
+<div class="section-header">
+    <div>
+        <div class="eyebrow mb-2">Operação {{ tenant.nome }}</div>
+        <h1 class="section-title">Dashboard de atendimento</h1>
+        <p class="section-subtitle">Mais densidade visual para fila, check-in e guichês na mesma tela.</p>
+    </div>
+    <div class="d-flex flex-wrap gap-2">
+        {% if can_manage_tenant %}<a href="{% url 'importacao:create' %}" class="btn btn-success">Importar planilha</a>{% endif %}
+        <a href="{% url 'atendimento:painel' %}" class="btn btn-outline-dark" target="_blank">Painel de chamada</a>
+        {% if effective_guiche %}
+            {% if preview_mode %}
+            <button class="btn btn-dark" disabled>Prévia de chamada</button>
+            {% else %}
+            <form method="post" action="{% url 'atendimento:chamar_proximo' %}">{% csrf_token %}<button class="btn btn-dark">Chamar próximo</button></form>
+            {% endif %}
+        {% endif %}
+    </div>
+</div>
+<div class="row row-cols-2 row-cols-lg-5 g-3 mb-3 row-tight">
     {% include 'components/metric_card.html' with label='Total importado' value=total_importado icon='bi-file-earmark-arrow-up' %}
     {% include 'components/metric_card.html' with label='Chamados' value=chamados icon='bi-megaphone' %}
     {% include 'components/metric_card.html' with label='Atendidos' value=atendidos icon='bi-check2-circle' %}
-    {% include 'components/metric_card.html' with label='Guiches ativos' value=guiches_ativos icon='bi-pc-display' %}
-    {% include 'components/metric_card.html' with label='Tempo medio' value=tempo_medio icon='bi-stopwatch' %}
+    {% include 'components/metric_card.html' with label='Guichês ativos' value=guiches_ativos icon='bi-pc-display' %}
+    {% include 'components/metric_card.html' with label='Tempo médio' value=tempo_medio icon='bi-stopwatch' %}
 </div>
-<div class="row g-4 mb-4">
-    <div class="col-12 col-xl-5">
-        <div class="card border-0 shadow-sm now-calling-card h-100"><div class="card-body p-4">
-            <div class="eyebrow mb-3">Agora chamando</div>
-            {% if agora_chamando %}
-            <h2 class="display-6 mb-2">{{ agora_chamando.nome }}</h2>
-            <div class="small text-secondary mb-2">{{ agora_chamando.documento|default:'Sem documento' }}</div>
-            <div class="d-flex flex-wrap gap-2 mb-2">
-                <span class="badge {{ agora_chamando.servico_visual.badge }}">{{ agora_chamando.tipo_servico|default:'Sem servico' }}</span>
-                <span class="badge text-bg-light border">{{ agora_chamando.servico_visual.label }}</span>
-            </div>
-            <div class="d-flex flex-wrap gap-2 mb-3">
-                <span class="tenant-pill">{{ agora_chamando.hora_agendada|time:'H:i' }}</span>
-                <span class="tenant-pill">{{ agora_chamando.guiche }}</span>
-                <span class="tenant-pill">{{ agora_chamando.get_status_display }}</span>
-            </div>
-            <p class="mb-0 text-secondary">{{ agora_chamando.observacao|default:'Sem observações.' }}</p>
-            {% else %}<p class="text-secondary mb-0">Nenhum atendimento chamado no momento.</p>{% endif %}
-        </div></div>
-    </div>
-    <div class="col-12 col-xl-7">
-        <div class="card border-0 shadow-sm h-100"><div class="card-body p-4">
-            <div class="d-flex justify-content-between align-items-center mb-3"><h2 class="h5 mb-0">Próximos da fila</h2><a href="{% url 'atendimento:encaixe_create' %}" class="btn btn-sm btn-outline-success">Novo encaixe</a></div>
-            <div class="row row-cols-1 row-cols-md-2 g-3">
-                {% for item in fila %}
-                <div class="col"><div class="queue-card p-3 h-100">
-                    <div class="d-flex justify-content-between gap-2 mb-2"><strong>{{ item.nome }}</strong>{% include 'components/badge.html' with value=item.classificacao_fila label=item.get_classificacao_fila_display %}</div>
-                    <div class="small text-secondary mb-1">{{ item.documento|default:'Sem documento' }}</div>
-                    <div class="d-flex flex-wrap gap-2 mb-2"><span class="badge {{ item.servico_visual.badge }}">{{ item.tipo_servico|default:'Sem servico' }}</span><span class="badge text-bg-light border">{{ item.servico_visual.label }}</span></div>
-                    <div class="small text-secondary mb-2">Agendado: {{ item.hora_agendada|time:'H:i'|default:'--:--' }} | Chegada: {{ item.hora_chegada|time:'H:i'|default:'--:--' }}</div>
-                    <div class="small mb-3">{{ item.observacao|default:'Sem observações.' }}</div>
-                    <div class="d-flex gap-2 flex-wrap">
-                        {% if user.guiche %}<form method="post" action="{% url 'atendimento:concluir' item.pk %}">{% csrf_token %}<button class="btn btn-sm btn-success">Concluir</button></form>{% endif %}
-                        <form method="post" action="{% url 'atendimento:ausente' item.pk %}">{% csrf_token %}<button class="btn btn-sm btn-outline-secondary">Ausente</button></form>
-                    </div>
-                </div></div>
-                {% empty %}<div class="col-12 text-secondary">Não há fila elegível no momento.</div>{% endfor %}
-            </div>
-        </div></div>
-    </div>
-</div>
-<div class="row g-4">
-    <div class="col-12 col-xl-5">
-        <div class="card border-0 shadow-sm h-100"><div class="card-body p-4">
-            <h2 class="h5 mb-3">Aguardando check-in</h2>
-            <div class="list-group list-group-flush">
-                {% for item in aguardando_checkin %}
-                <div class="list-group-item px-0">
-                    <div class="d-flex justify-content-between align-items-center gap-2 mb-1"><strong>{{ item.nome }}</strong><span class="text-secondary small">{{ item.hora_agendada|time:'H:i' }}</span></div>
-                    <div class="small text-secondary mb-1">{{ item.documento|default:'Sem documento' }}</div>
-                    <div class="d-flex flex-wrap gap-2 mb-2"><span class="badge {{ item.servico_visual.badge }}">{{ item.tipo_servico|default:'Sem servico' }}</span><span class="badge text-bg-light border">{{ item.servico_visual.label }}</span></div>
-                    <form method="post" action="{% url 'atendimento:checkin' item.pk %}" class="row g-2">{% csrf_token %}
-                        <div class="col-8"><input type="time" name="hora_chegada" class="form-control" required></div>
-                        <div class="col-4 d-grid"><button class="btn btn-outline-success">Check-in</button></div>
-                    </form>
+<div class="row g-3 row-tight mb-3">
+    <div class="col-12 col-xl-4">
+        <div class="card border-0 shadow-sm now-calling-card h-100">
+            <div class="card-body">
+                <div class="eyebrow mb-2">Agora chamando</div>
+                {% if agora_chamando %}
+                <h2 class="h2 mb-2">{{ agora_chamando.nome }}</h2>
+                <div class="small text-secondary mb-2">{{ agora_chamando.documento|default:'Sem documento' }}</div>
+                <div class="d-flex flex-wrap gap-2 mb-2">
+                    <span class="badge {{ agora_chamando.servico_visual.badge }}">{{ agora_chamando.tipo_servico|default:'Sem serviço' }}</span>
+                    <span class="badge text-bg-light border">{{ agora_chamando.servico_visual.label }}</span>
+                    <span class="tenant-pill">{{ agora_chamando.hora_agendada|time:'H:i' }}</span>
+                    <span class="tenant-pill">{{ agora_chamando.guiche }}</span>
+                    <span class="tenant-pill">{{ agora_chamando.get_status_display }}</span>
                 </div>
-                {% empty %}<div class="text-secondary">Nenhum agendamento aguardando check-in.</div>{% endfor %}
+                <p class="mb-0 text-secondary">{{ agora_chamando.observacao|default:'Sem observações.' }}</p>
+                {% else %}
+                <p class="text-secondary mb-0">Nenhum atendimento chamado no momento.</p>
+                {% endif %}
             </div>
-        </div></div>
+        </div>
     </div>
-    <div class="col-12 col-xl-7">
-        <div class="card border-0 shadow-sm h-100"><div class="card-body p-4">
-            <h2 class="h5 mb-3">Situação dos guichês</h2>
-            <div class="row row-cols-1 row-cols-md-2 g-3">
-                {% for item in guiches %}
-                <div class="col"><div class="queue-card p-3 h-100"><div class="d-flex justify-content-between"><strong>{{ item.codigo }} - {{ item.nome }}</strong><span class="badge text-bg-light">{{ item.get_situacao_display }}</span></div><div class="small text-secondary mt-2">{% if item.usuarios_vinculados.first %}{{ item.usuarios_vinculados.first.username }}{% else %}Sem operador vinculado{% endif %}</div></div></div>
-                {% empty %}<div class="col-12 text-secondary">Nenhum guichê cadastrado.</div>{% endfor %}
+    <div class="col-12 col-xl-8">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="section-header mb-3">
+                    <div>
+                        <h2 class="h5 mb-1">Próximos da fila</h2>
+                        <p class="section-subtitle">Ordem inteligente já pronta para ação.</p>
+                    </div>
+                    <a href="{% url 'atendimento:encaixe_create' %}" class="btn btn-sm btn-outline-success">Novo encaixe</a>
+                </div>
+                <div class="row row-cols-1 row-cols-lg-2 g-3 row-tight">
+                    {% for item in fila %}
+                    <div class="col">
+                        <div class="queue-card p-3 h-100">
+                            <div class="d-flex justify-content-between gap-2 mb-2"><strong>{{ item.nome }}</strong>{% include 'components/badge.html' with value=item.classificacao_fila label=item.get_classificacao_fila_display %}</div>
+                            <div class="small text-secondary mb-1">{{ item.documento|default:'Sem documento' }}</div>
+                            <div class="d-flex flex-wrap gap-2 mb-2"><span class="badge {{ item.servico_visual.badge }}">{{ item.tipo_servico|default:'Sem serviço' }}</span><span class="badge text-bg-light border">{{ item.servico_visual.label }}</span></div>
+                            <div class="small text-secondary mb-2">Agendado: {{ item.hora_agendada|time:'H:i'|default:'--:--' }} | Chegada: {{ item.hora_chegada|time:'H:i'|default:'--:--' }}</div>
+                            <div class="small mb-3">{{ item.observacao|default:'Sem observações.' }}</div>
+                            <div class="d-flex gap-2 flex-wrap">
+                                {% if effective_guiche %}
+                                    {% if preview_mode %}
+                                    <button class="btn btn-sm btn-success" disabled>Concluir</button>
+                                    {% else %}
+                                    <form method="post" action="{% url 'atendimento:concluir' item.pk %}">{% csrf_token %}<button class="btn btn-sm btn-success">Concluir</button></form>
+                                    {% endif %}
+                                {% endif %}
+                                {% if preview_mode %}
+                                <button class="btn btn-sm btn-outline-secondary" disabled>Ausente</button>
+                                {% else %}
+                                <form method="post" action="{% url 'atendimento:ausente' item.pk %}">{% csrf_token %}<button class="btn btn-sm btn-outline-secondary">Ausente</button></form>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}<div class="col-12 text-secondary">Não há fila elegível no momento.</div>{% endfor %}
+                </div>
             </div>
-        </div></div>
+        </div>
+    </div>
+</div>
+<div class="row g-3 row-tight">
+    <div class="col-12 col-xl-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <h2 class="h5 mb-3">Aguardando check-in</h2>
+                <div class="list-group list-group-flush">
+                    {% for item in aguardando_checkin %}
+                    <div class="list-group-item px-0">
+                        <div class="d-flex justify-content-between align-items-center gap-2 mb-1"><strong>{{ item.nome }}</strong><span class="text-secondary small">{{ item.hora_agendada|time:'H:i' }}</span></div>
+                        <div class="small text-secondary mb-1">{{ item.documento|default:'Sem documento' }}</div>
+                        <div class="d-flex flex-wrap gap-2 mb-2"><span class="badge {{ item.servico_visual.badge }}">{{ item.tipo_servico|default:'Sem serviço' }}</span><span class="badge text-bg-light border">{{ item.servico_visual.label }}</span></div>
+                        {% if preview_mode %}
+                        <div class="row g-2"><div class="col-8"><input type="time" class="form-control" disabled></div><div class="col-4 d-grid"><button class="btn btn-outline-success" disabled>Check-in</button></div></div>
+                        {% else %}
+                        <form method="post" action="{% url 'atendimento:checkin' item.pk %}" class="row g-2">{% csrf_token %}
+                            <div class="col-8"><input type="time" name="hora_chegada" class="form-control" required></div>
+                            <div class="col-4 d-grid"><button class="btn btn-outline-success">Check-in</button></div>
+                        </form>
+                        {% endif %}
+                    </div>
+                    {% empty %}<div class="text-secondary">Nenhum agendamento aguardando check-in.</div>{% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-xl-8">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <h2 class="h5 mb-3">Situação dos guichês</h2>
+                <div class="row row-cols-1 row-cols-lg-3 g-3 row-tight">
+                    {% for item in guiches %}
+                    <div class="col"><div class="queue-card p-3 h-100"><div class="d-flex justify-content-between gap-2"><strong>{{ item.codigo }} - {{ item.nome }}</strong><span class="badge text-bg-light">{{ item.get_situacao_display }}</span></div><div class="small text-secondary mt-2">{% if item.usuarios_vinculados.first %}{{ item.usuarios_vinculados.first.username }}{% else %}Sem operador vinculado{% endif %}</div></div></div>
+                    {% empty %}<div class="col-12 text-secondary">Nenhum guichê cadastrado.</div>{% endfor %}
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 {% endif %}
 {% endblock %}
+

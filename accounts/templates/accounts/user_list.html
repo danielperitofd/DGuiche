@@ -1,17 +1,17 @@
 ﻿{% extends 'base.html' %}
 {% block title %}Usuários | AgendM{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="section-header">
     <div>
-        <h1 class="h3 mb-1">Usuarios</h1>
-        <p class="text-secondary mb-0">Gestao de acessos por tenant e vinculo com guiche.</p>
+        <h1 class="section-title">Usuários</h1>
+        <p class="section-subtitle">Gestão de acessos por tenant com leitura mais densa.</p>
     </div>
-    <a href="{% url 'accounts:create' %}" class="btn btn-success"><i class="bi bi-plus-lg"></i> Novo usuario</a>
+    <a href="{% url 'accounts:create' %}" class="btn btn-success"><i class="bi bi-plus-lg"></i> Novo usuário</a>
 </div>
 <div class="card border-0 shadow-sm">
     <div class="table-responsive">
         <table class="table align-middle mb-0">
-            <thead><tr><th>Usuario</th><th>Tenant</th><th>Guiche</th><th>Perfil</th><th></th></tr></thead>
+            <thead><tr><th>Usuário</th><th>Tenant</th><th>Guichê</th><th>Perfil</th><th></th></tr></thead>
             <tbody>
                 {% for item in users %}
                 <tr>
@@ -19,13 +19,14 @@
                     <td>{{ item.tenant|default:'Global' }}</td>
                     <td>{{ item.guiche|default:'-' }}</td>
                     <td>{% if item.is_global_master %}Master global{% elif item.is_staff %}Admin tenant{% else %}Operador{% endif %}</td>
-                    <td class="text-end d-flex justify-content-end gap-2"><a href="{% url 'accounts:update' item.pk %}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil"></i></a><a href="{% url 'accounts:delete' item.pk %}" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></a></td>
+                    <td class="text-end compact-table-actions"><a href="{% url 'accounts:update' item.pk %}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil"></i></a> <a href="{% url 'accounts:delete' item.pk %}" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></a></td>
                 </tr>
                 {% empty %}
-                <tr><td colspan="5" class="text-center py-4 text-secondary">Nenhum usuario cadastrado.</td></tr>
+                <tr><td colspan="5" class="text-center py-4 text-secondary">Nenhum usuário cadastrado.</td></tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
 </div>
 {% endblock %}
+

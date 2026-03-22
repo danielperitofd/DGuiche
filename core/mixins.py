@@ -13,3 +13,9 @@ class GlobalMasterRequiredMixin(UserPassesTestMixin):
     def test_func(self):
         return self.request.user.is_authenticated and self.request.user.is_global_master
 
+
+class TenantManagementRequiredMixin(UserPassesTestMixin):
+    def test_func(self):
+        user = self.request.user
+        return user.is_authenticated and (user.is_global_master or user.is_staff)
+

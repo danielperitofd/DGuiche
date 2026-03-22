@@ -1,17 +1,23 @@
 ﻿{% extends 'base.html' %}
 {% block title %}Usuário | AgendM{% endblock %}
 {% block content %}
-<div class="row justify-content-center">
+<div class="row justify-content-center row-tight">
     <div class="col-12 col-xl-8">
         <div class="card border-0 shadow-sm">
-            <div class="card-body p-4">
-                <h1 class="h4 mb-4">Cadastro de usuário</h1>
-                <form method="post" class="row g-3">
+            <div class="card-body">
+                <div class="section-header mb-3">
+                    <div>
+                        <h1 class="section-title">Cadastro de usuário</h1>
+                        <p class="section-subtitle">Campos organizados para edição rápida.</p>
+                    </div>
+                </div>
+                <form method="post" class="row g-3 row-tight">
                     {% csrf_token %}
                     {% for field in form %}
-                    <div class="col-md-6">
+                    <div class="col-12 col-md-6">
                         <label class="form-label">{{ field.label }}</label>
                         {{ field }}
+                        {% if field.help_text %}<div class="form-hint">{{ field.help_text }}</div>{% endif %}
                         {% if field.errors %}<div class="text-danger small">{{ field.errors|join:', ' }}</div>{% endif %}
                     </div>
                     {% endfor %}

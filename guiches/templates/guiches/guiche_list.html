@@ -1,25 +1,29 @@
 ﻿{% extends 'base.html' %}
-{% block title %}Guiches | AgendM{% endblock %}
+{% block title %}Guichês | AgendM{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div><h1 class="h3 mb-1">Guiches</h1><p class="text-secondary mb-0">Status operacional e vinculacao por tenant.</p></div>
-    <a href="{% url 'guiches:create' %}" class="btn btn-success"><i class="bi bi-plus-lg"></i> Novo guiche</a>
+<div class="section-header">
+    <div><h1 class="section-title">Guichês</h1><p class="section-subtitle">Status operacional e vínculo por tenant.</p></div>
+    <a href="{% url 'guiches:create' %}" class="btn btn-success"><i class="bi bi-plus-lg"></i> Novo guichê</a>
 </div>
 <div class="card border-0 shadow-sm">
     <div class="table-responsive">
         <table class="table align-middle mb-0">
-            <thead><tr><th>Codigo</th><th>Nome</th><th>Tenant</th><th>Situacao</th><th></th></tr></thead>
+            <thead><tr><th>Código</th><th>Nome</th><th>Tenant</th><th>Situação</th><th></th></tr></thead>
             <tbody>
                 {% for item in guiches %}
                 <tr>
-                    <td>{{ item.codigo }}</td><td>{{ item.nome }}</td><td>{{ item.tenant }}</td><td>{{ item.get_situacao_display }}</td>
-                    <td class="text-end d-flex justify-content-end gap-2"><a href="{% url 'guiches:update' item.pk %}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil"></i></a><a href="{% url 'guiches:delete' item.pk %}" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></a></td>
+                    <td>{{ item.codigo }}</td>
+                    <td>{{ item.nome }}</td>
+                    <td>{{ item.tenant }}</td>
+                    <td>{{ item.get_situacao_display }}</td>
+                    <td class="text-end compact-table-actions"><a href="{% url 'guiches:update' item.pk %}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil"></i></a> <a href="{% url 'guiches:delete' item.pk %}" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></a></td>
                 </tr>
                 {% empty %}
-                <tr><td colspan="5" class="text-center py-4 text-secondary">Nenhum guiche cadastrado.</td></tr>
+                <tr><td colspan="5" class="text-center py-4 text-secondary">Nenhum guichê cadastrado.</td></tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
 </div>
 {% endblock %}
+

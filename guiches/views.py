@@ -2,12 +2,12 @@
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DeleteView, ListView, UpdateView
 
-from core.mixins import TenantContextMixin
+from core.mixins import TenantContextMixin, TenantManagementRequiredMixin
 from guiches.forms import GuicheForm
 from guiches.models import Guiche
 
 
-class GuicheListView(TenantContextMixin, ListView):
+class GuicheListView(TenantManagementRequiredMixin, TenantContextMixin, ListView):
     model = Guiche
     template_name = "guiches/guiche_list.html"
     context_object_name = "guiches"
@@ -19,7 +19,7 @@ class GuicheListView(TenantContextMixin, ListView):
         return queryset.filter(tenant=self.request.user.tenant).order_by("codigo")
 
 
-class GuicheCreateView(TenantContextMixin, CreateView):
+class GuicheCreateView(TenantManagementRequiredMixin, TenantContextMixin, CreateView):
     model = Guiche
     form_class = GuicheForm
     template_name = "guiches/guiche_form.html"
@@ -38,7 +38,7 @@ class GuicheCreateView(TenantContextMixin, CreateView):
         return super().form_valid(form)
 
 
-class GuicheUpdateView(TenantContextMixin, UpdateView):
+class GuicheUpdateView(TenantManagementRequiredMixin, TenantContextMixin, UpdateView):
     model = Guiche
     form_class = GuicheForm
     template_name = "guiches/guiche_form.html"
@@ -63,7 +63,7 @@ class GuicheUpdateView(TenantContextMixin, UpdateView):
         return super().form_valid(form)
 
 
-class GuicheDeleteView(TenantContextMixin, DeleteView):
+class GuicheDeleteView(TenantManagementRequiredMixin, TenantContextMixin, DeleteView):
     model = Guiche
     template_name = "components/confirm_delete.html"
     success_url = reverse_lazy("guiches:list")
@@ -83,3 +83,4 @@ class GuicheDeleteView(TenantContextMixin, DeleteView):
         context["title"] = "Excluir guiche"
         context["cancel_url"] = reverse_lazy("guiches:list")
         return context
+

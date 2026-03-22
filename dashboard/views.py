@@ -6,6 +6,7 @@ from django.views.generic import TemplateView
 from accounts.models import User
 from atendimento.models import Atendimento
 from atendimento.services import fila_inteligente_queryset
+from core.utils import get_staff_preview_state
 from guiches.models import Guiche
 from importacao.models import ImportacaoPlanilha
 from tenants.models import Tenant
@@ -30,6 +31,7 @@ class DashboardHomeView(LoginRequiredMixin, TemplateView):
             return context
 
         tenant = user.tenant
+        preview_state = get_staff_preview_state(self.request)
         queryset = Atendimento.objects.filter(tenant=tenant)
         fila = fila_inteligente_queryset(tenant)[:8]
         agora_chamando = queryset.filter(status=Atendimento.Status.CHAMADO).select_related("guiche").order_by("-chamado_em").first()
@@ -59,6 +61,8 @@ class DashboardHomeView(LoginRequiredMixin, TemplateView):
                 "guiches": Guiche.objects.filter(tenant=tenant).order_by("codigo"),
                 "importacoes": ImportacaoPlanilha.objects.filter(tenant=tenant)[:5],
                 "aguardando_checkin": queryset.filter(status=Atendimento.Status.AGUARDANDO, hora_chegada__isnull=True).order_by("hora_agendada")[:8],
+                "effective_guiche": preview_state["effective_guiche"],
             }
         )
         return context
+

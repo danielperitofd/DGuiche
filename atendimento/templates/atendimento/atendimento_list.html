@@ -1,7 +1,50 @@
 ﻿{% extends 'base.html' %}
 {% block title %}Fila | AgendM{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4"><div><h1 class="h3 mb-1">Tabela de atendimentos</h1><p class="text-secondary mb-0">Busca, filtros e historico operacional da tenant.</p></div></div>
-<div class="card border-0 shadow-sm mb-4"><div class="card-body"><form method="get" class="row g-3">{% for field in filter_form %}<div class="col-12 col-md-6 col-xl-3"><label class="form-label">{{ field.label }}</label>{{ field }}</div>{% endfor %}<div class="col-12 d-flex justify-content-end"><button class="btn btn-outline-success">Filtrar</button></div></form></div></div>
-<div class="card border-0 shadow-sm"><div class="table-responsive"><table class="table align-middle mb-0"><thead><tr><th>Nome</th><th>Documento</th><th>Servico</th><th>Data</th><th>Hora</th><th>Status</th><th>Classificacao</th><th>Guiche</th><th>Contato</th></tr></thead><tbody>{% for item in atendimentos %}<tr><td>{{ item.nome }}</td><td>{{ item.documento|default:'-' }}</td><td>{{ item.tipo_servico|default:'-' }}</td><td>{{ item.data_referencia|date:'d/m/Y' }}</td><td>{{ item.hora_agendada|time:'H:i'|default:'--:--' }}</td><td>{{ item.get_status_display }}</td><td>{{ item.get_classificacao_fila_display }}</td><td>{{ item.guiche|default:'-' }}</td><td><div>{{ item.telefone|default:'-' }}</div><div class="small text-secondary">{{ item.email|default:'' }}</div></td></tr>{% empty %}<tr><td colspan="9" class="text-center py-4 text-secondary">Nenhum atendimento encontrado.</td></tr>{% endfor %}</tbody></table></div></div>
+<div class="section-header">
+    <div>
+        <h1 class="section-title">Tabela de atendimentos</h1>
+        <p class="section-subtitle">Busca, filtros e histórico operacional em formato mais compacto.</p>
+    </div>
+</div>
+<div class="card border-0 shadow-sm mb-3">
+    <div class="card-body">
+        <form method="get" class="row g-3 row-tight">
+            {% for field in filter_form %}
+            <div class="col-12 col-md-6 col-xl-2">
+                <label class="form-label">{{ field.label }}</label>
+                {{ field }}
+            </div>
+            {% endfor %}
+            <div class="col-12 col-xl-2 d-flex align-items-end justify-content-end">
+                <button class="btn btn-outline-success w-100">Filtrar</button>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="card border-0 shadow-sm">
+    <div class="table-responsive">
+        <table class="table align-middle mb-0">
+            <thead><tr><th>Nome</th><th>Documento</th><th>Serviço</th><th>Data</th><th>Hora</th><th>Status</th><th>Classificação</th><th>Guichê</th><th>Contato</th></tr></thead>
+            <tbody>
+                {% for item in atendimentos %}
+                <tr>
+                    <td>{{ item.nome }}</td>
+                    <td>{{ item.documento|default:'-' }}</td>
+                    <td>{{ item.tipo_servico|default:'-' }}</td>
+                    <td>{{ item.data_referencia|date:'d/m/Y' }}</td>
+                    <td>{{ item.hora_agendada|time:'H:i'|default:'--:--' }}</td>
+                    <td>{{ item.get_status_display }}</td>
+                    <td>{{ item.get_classificacao_fila_display }}</td>
+                    <td>{{ item.guiche|default:'-' }}</td>
+                    <td><div>{{ item.telefone|default:'-' }}</div><div class="small text-secondary">{{ item.email|default:'' }}</div></td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="9" class="text-center py-4 text-secondary">Nenhum atendimento encontrado.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
 {% endblock %}
+
