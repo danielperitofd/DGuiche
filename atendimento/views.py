@@ -17,7 +17,8 @@ class AtendimentoListView(LoginRequiredMixin, ListView):
     paginate_by = 20
 
     def get_queryset(self):
-        queryset = Atendimento.objects.select_related("tenant", "guiche", "origem_importacao").filter(tenant=self.request.user.tenant)
+        tenant = self.request.tenant or self.request.user.tenant
+        queryset = Atendimento.objects.select_related("tenant", "guiche", "origem_importacao").filter(tenant=tenant)
         form = self.filter_form
         if form.is_valid():
             nome = form.cleaned_data.get("nome")
@@ -43,7 +44,8 @@ class AtendimentoListView(LoginRequiredMixin, ListView):
         return context
 
     def dispatch(self, request, *args, **kwargs):
-        self.filter_form = AtendimentoFilterForm(request.GET or None, tenant=request.user.tenant)
+        tenant = request.tenant or request.user.tenant
+        self.filter_form = AtendimentoFilterForm(request.GET or None, tenant=tenant)
         return super().dispatch(request, *args, **kwargs)
 
 

@@ -8,4 +8,3 @@ def app_context(request):
         "is_global_master": getattr(getattr(request, "user", None), "is_global_master", False),
         **preview_state,
     }
-

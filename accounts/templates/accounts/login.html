@@ -1,35 +1,82 @@
 ﻿{% extends 'base.html' %}
 {% block title %}Login | AgendM{% endblock %}
 {% block content %}
-<div class="row justify-content-center align-items-center min-vh-100 py-5">
-    <div class="col-12 col-md-8 col-lg-5">
-        <div class="card border-0 shadow-lg login-card">
-            <div class="card-body p-4 p-lg-5">
-                <div class="mb-4">
-                    <div class="eyebrow mb-2">SaaS Multi-tenant</div>
-                    <h1 class="h3 mb-2">Fluxo inteligente de atendimento</h1>
-                    <p class="text-secondary mb-0">Fila por horário, atraso, encaixe e operação por guichê.</p>
-                </div>
-                <form method="post" class="row g-3">
+<div class="pro-page">
+    <section class="pro-shell">
+        <div class="pro-hero">
+            {% if messages %}
+            {% for message in messages %}
+            <div class="pro-top-alert">
+                <span class="dot"></span>
+                {{ message }}
+            </div>
+            {% endfor %}
+            {% endif %}
+
+            <div class="pro-eyebrow">Plataforma de atendimento</div>
+            <h1>
+                Entrar na plataforma com uma experiência
+                <span class="accent">mais clara</span>, segura e profissional.
+            </h1>
+            <p>
+                Centralize filas, chamadas, check-in e execução operacional em uma interface elegante,
+                responsiva e preparada para múltiplas unidades.
+            </p>
+
+            <div class="pro-feature-list">
+                <article class="pro-feature">
+                    <div class="pro-feature-icon"><i class="bi bi-diagram-3"></i></div>
+                    <div>
+                        <h3>Fluxo centralizado</h3>
+                        <p>Fila, check-in, painel e operação no mesmo ambiente, com leitura visual imediata.</p>
+                    </div>
+                </article>
+                <article class="pro-feature">
+                    <div class="pro-feature-icon"><i class="bi bi-buildings"></i></div>
+                    <div>
+                        <h3>Gestão por tenant</h3>
+                        <p>Separação administrativa por unidade com consistência operacional e controle de acesso.</p>
+                    </div>
+                </article>
+                <article class="pro-feature">
+                    <div class="pro-feature-icon"><i class="bi bi-shield-check"></i></div>
+                    <div>
+                        <h3>Acesso controlado</h3>
+                        <p>Cadastro público opcional por tenant com autenticação segura e rastreável.</p>
+                    </div>
+                </article>
+            </div>
+        </div>
+
+        <div class="pro-auth-wrap">
+            <div class="pro-auth-card">
+                <span class="pro-brand-mini">AgendM</span>
+                <h2>Entrar na plataforma</h2>
+                <p class="pro-subtitle">Use suas credenciais para acessar o ambiente da operação com segurança e rastreabilidade.</p>
+
+                <form method="post" class="pro-form-grid">
                     {% csrf_token %}
-                    <div class="col-12">
-                        <label class="form-label">{{ form.username.label }}</label>
+                    <div class="pro-field">
+                        <label for="id_username">{{ form.username.label }}</label>
                         {{ form.username }}
                     </div>
-                    <div class="col-12">
-                        <label class="form-label">{{ form.password.label }}</label>
+                    <div class="pro-field">
+                        <label for="id_password">{{ form.password.label }}</label>
                         {{ form.password }}
                     </div>
-                    <div class="col-12 d-grid">
-                        <button class="btn btn-success btn-lg">Entrar</button>
-                    </div>
+                    <button type="submit" class="pro-btn">Entrar</button>
                 </form>
-                <div class="mt-4 small text-secondary">
-                    Superusuário inicial: <strong>demasantosdev</strong>
+
+                <div class="pro-divider">acesso seguro</div>
+
+                <div class="pro-auth-footer">
+                    {% if signup_available %}
+                    <a href="{% url 'accounts:signup' %}" class="pro-outline-btn">Criar conta</a>
+                    {% endif %}
+                    <a href="{% url 'dashboard:demo' %}" class="pro-outline-btn">Ver página demo</a>
                 </div>
             </div>
         </div>
-    </div>
+    </section>
 </div>
 {% endblock %}
-

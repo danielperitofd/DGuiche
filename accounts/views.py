@@ -5,9 +5,10 @@ from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DeleteView, ListView, UpdateView
 
-from accounts.forms import UserForm
+from accounts.forms import PublicSignupForm, UserForm
 from accounts.models import User
 from core.mixins import TenantContextMixin, TenantManagementRequiredMixin
+from tenants.models import Tenant
 
 
 def login_view(request):
@@ -17,6 +18,7 @@ def login_view(request):
     if request.user.is_authenticated:
         return redirect("dashboard:home")
     form = LoginForm(request.POST or None)
+    signup_available = Tenant.objects.filter(ativo=True, cadastro_publico_ativo=True).exists()
     if request.method == "POST" and form.is_valid():
         user = authenticate(
             request,
@@ -27,7 +29,22 @@ def login_view(request):
             login(request, user)
             return redirect("dashboard:home")
         messages.error(request, "Credenciais invalidas.")
-    return render(request, "accounts/login.html", {"form": form})
+    return render(request, "accounts/login.html", {"form": form, "signup_available": signup_available})
+
+
+def public_signup_view(request):
+    if request.user.is_authenticated:
+        return redirect("dashboard:home")
+    if not Tenant.objects.filter(ativo=True, cadastro_publico_ativo=True).exists():
+        messages.warning(request, "O cadastro público está indisponível no momento.")
+        return redirect("accounts:login")
+
+    form = PublicSignupForm(request.POST or None)
+    if request.method == "POST" and form.is_valid():
+        user = form.save()
+        messages.success(request, f"Conta criada com sucesso para {user.username}. Faça login para continuar.")
+        return redirect("accounts:login")
+    return render(request, "accounts/signup.html", {"form": form})
 
 
 class SaaSLogoutView(LogoutView):
@@ -115,17 +132,29 @@ class UserDeleteView(TenantManagementRequiredMixin, TenantContextMixin, DeleteVi
 @login_required
 def start_common_preview(request):
     user = request.user
-    if request.method == "POST" and user.is_staff and not user.is_global_master and user.tenant_id:
-        request.session["staff_preview_mode"] = "common"
-        guiche_id = request.POST.get("guiche_id")
-        guiche = user.tenant.guiches.filter(pk=guiche_id).first() if guiche_id else None
-        if guiche:
-            request.session["staff_preview_guiche_id"] = guiche.pk
-        elif user.guiche_id:
-            request.session["staff_preview_guiche_id"] = user.guiche_id
+    if request.method == "POST" and (user.is_staff or user.is_global_master):
+        tenant = None
+        if user.is_global_master:
+            tenant_id = request.POST.get("tenant_id")
+            tenant = Tenant.objects.filter(pk=tenant_id).first() if tenant_id else None
+        elif user.tenant_id:
+            tenant = user.tenant
+
+        if tenant is not None:
+            request.session["staff_preview_mode"] = "common"
+            request.session["staff_preview_tenant_id"] = tenant.pk
+            guiche_id = request.POST.get("guiche_id")
+            guiche = tenant.guiches.filter(pk=guiche_id).first() if guiche_id else None
+            if guiche:
+                request.session["staff_preview_guiche_id"] = guiche.pk
+            elif not user.is_global_master and user.guiche_id and user.tenant_id == tenant.id:
+                request.session["staff_preview_guiche_id"] = user.guiche_id
+            else:
+                request.session.pop("staff_preview_guiche_id", None)
+            messages.info(request, "Pre-visualizacao de operador ativada.")
         else:
-            request.session.pop("staff_preview_guiche_id", None)
-        messages.info(request, "Pre-visualizacao de operador ativada.")
+            messages.warning(request, "Selecione uma tenant para entrar no modo operador.")
+
     return redirect(request.POST.get("next") or "dashboard:home")
 
 
@@ -133,7 +162,7 @@ def start_common_preview(request):
 def stop_common_preview(request):
     if request.method == "POST":
         request.session.pop("staff_preview_mode", None)
+        request.session.pop("staff_preview_tenant_id", None)
         request.session.pop("staff_preview_guiche_id", None)
         messages.info(request, "Pre-visualizacao de operador desativada.")
     return redirect(request.POST.get("next") or "dashboard:home")
-

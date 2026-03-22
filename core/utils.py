@@ -29,39 +29,47 @@ def parse_time_string(value):
 
 
 def get_staff_preview_state(request):
-    user = getattr(request, "user", None)
-    default_state = {
-        "preview_mode": False,
-        "preview_guiche": None,
-        "effective_guiche": getattr(user, "guiche", None) if user and getattr(user, "is_authenticated", False) else None,
-        "viewer_is_common": bool(
-            user
-            and getattr(user, "is_authenticated", False)
-            and not getattr(user, "is_global_master", False)
-            and not getattr(user, "is_staff", False)
-        ),
-        "can_manage_tenant": bool(
-            user
-            and getattr(user, "is_authenticated", False)
-            and (getattr(user, "is_global_master", False) or getattr(user, "is_staff", False))
-        ),
-    }
-    if not user or not user.is_authenticated or user.is_global_master or not user.is_staff or not user.tenant_id:
-        return default_state
+    from tenants.models import Tenant
 
-    preview_mode = request.session.get("staff_preview_mode") == "common"
-    preview_guiche = None
-    guiche_id = request.session.get("staff_preview_guiche_id")
-    if guiche_id:
-        preview_guiche = user.tenant.guiches.filter(pk=guiche_id).first()
-    if preview_mode and preview_guiche is None:
-        preview_guiche = user.guiche or user.tenant.guiches.filter(ativo=True).order_by("codigo").first()
+    user = getattr(request, "user", None)
+    if not user or not getattr(user, "is_authenticated", False):
+        return {
+            "preview_mode": False,
+            "preview_guiche": None,
+            "effective_guiche": None,
+            "viewer_is_common": False,
+            "can_manage_tenant": False,
+            "can_start_preview": False,
+            "preview_tenants": Tenant.objects.none(),
+            "preview_guiches": [],
+        }
+
+    current_tenant = getattr(request, "tenant", None)
+    preview_guiche = getattr(request, "preview_guiche", None)
+    preview_mode = bool(getattr(request, "preview_mode", False))
+    can_start_preview = bool(user.is_global_master or user.is_staff)
+
+    if preview_mode:
+        effective_guiche = preview_guiche
+    elif user.is_global_master:
+        effective_guiche = None
+    else:
+        effective_guiche = user.guiche
+
+    if current_tenant is not None:
+        preview_guiches = list(current_tenant.guiches.order_by("codigo", "nome"))
+    elif user.tenant_id:
+        preview_guiches = list(user.tenant.guiches.order_by("codigo", "nome"))
+    else:
+        preview_guiches = []
 
     return {
         "preview_mode": preview_mode,
         "preview_guiche": preview_guiche,
-        "effective_guiche": preview_guiche if preview_mode else user.guiche,
-        "viewer_is_common": preview_mode,
-        "can_manage_tenant": not preview_mode,
+        "effective_guiche": effective_guiche,
+        "viewer_is_common": preview_mode or (not user.is_global_master and not user.is_staff),
+        "can_manage_tenant": bool(user.is_global_master or user.is_staff) and not preview_mode,
+        "can_start_preview": can_start_preview,
+        "preview_tenants": Tenant.objects.order_by("nome") if user.is_global_master else Tenant.objects.none(),
+        "preview_guiches": preview_guiches,
     }
-

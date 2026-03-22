@@ -7,6 +7,7 @@ class Tenant(models.Model):
     slug = models.SlugField(max_length=160, unique=True)
     codigo = models.CharField(max_length=30, unique=True)
     ativo = models.BooleanField(default=True)
+    cadastro_publico_ativo = models.BooleanField(default=False)
     descricao = models.TextField(blank=True)
     criado_em = models.DateTimeField(auto_now_add=True)
     atualizado_em = models.DateTimeField(auto_now=True)
@@ -23,4 +24,3 @@ class Tenant(models.Model):
 
     def __str__(self):
         return self.nome
-

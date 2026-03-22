@@ -1,0 +1,41 @@
+﻿{% extends 'base.html' %}
+{% block title %}Criar Conta | AgendM{% endblock %}
+{% block content %}
+<div class="login-shell row align-items-center g-4 g-xl-5 min-vh-login py-4 py-lg-5">
+    <div class="col-12 col-xl-5">
+        <div class="login-hero">
+            <div class="eyebrow mb-3">Cadastro público</div>
+            <h1 class="login-title">Crie sua conta e entre no ambiente da sua tenant.</h1>
+            <p class="login-copy">Escolha a tenant disponível para cadastro, informe seus dados e finalize o acesso. O controle dessa opção é feito pela administração.</p>
+        </div>
+    </div>
+    <div class="col-12 col-xl-6 ms-xl-auto">
+        <div class="card border-0 shadow-lg login-card login-panel">
+            <div class="card-body p-4 p-lg-5">
+                <div class="login-panel-header mb-4">
+                    <div class="login-logo-mark">Criar conta</div>
+                    <h2 class="h2 mb-2">Novo acesso</h2>
+                    <p class="mb-0">Preencha os campos abaixo para solicitar seu acesso operacional.</p>
+                </div>
+                <form method="post" class="row g-3 login-form-modern">
+                    {% csrf_token %}
+                    {% for field in form %}
+                    <div class="col-12 {% if field.name == 'first_name' or field.name == 'last_name' or field.name == 'username' or field.name == 'email' or field.name == 'telefone' or field.name == 'password1' or field.name == 'password2' %}col-lg-6{% endif %}">
+                        <label class="form-label">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.errors %}<div class="text-danger small mt-1">{{ field.errors|join:', ' }}</div>{% endif %}
+                    </div>
+                    {% endfor %}
+                    <div class="col-12 d-grid mt-2">
+                        <button class="btn btn-success btn-lg">Criar conta</button>
+                    </div>
+                </form>
+                <div class="login-footer-cta mt-4">
+                    <span>Já possui acesso?</span>
+                    <a href="{% url 'accounts:login' %}" class="btn btn-outline-dark">Voltar para login</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

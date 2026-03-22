@@ -6,6 +6,7 @@ app_name = "accounts"
 
 urlpatterns = [
     path("login/", views.login_view, name="login"),
+    path("criar-conta/", views.public_signup_view, name="signup"),
     path("logout/", views.SaaSLogoutView.as_view(), name="logout"),
     path("preview/common/", views.start_common_preview, name="preview_common"),
     path("preview/normal/", views.stop_common_preview, name="preview_normal"),
@@ -14,4 +15,3 @@ urlpatterns = [
     path("usuarios/<int:pk>/editar/", views.UserUpdateView.as_view(), name="update"),
     path("usuarios/<int:pk>/excluir/", views.UserDeleteView.as_view(), name="delete"),
 ]
-

@@ -3,6 +3,7 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import TemplateView
 
+from accounts.forms import LoginForm
 from accounts.models import User
 from atendimento.models import Atendimento
 from atendimento.services import fila_inteligente_queryset
@@ -12,13 +13,25 @@ from importacao.models import ImportacaoPlanilha
 from tenants.models import Tenant
 
 
+class DemoLandingView(TemplateView):
+    template_name = "dashboard/demo.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["form"] = LoginForm()
+        context["signup_available"] = Tenant.objects.filter(ativo=True, cadastro_publico_ativo=True).exists()
+        return context
+
+
 class DashboardHomeView(LoginRequiredMixin, TemplateView):
     template_name = "dashboard/home.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         user = self.request.user
-        if user.is_global_master:
+        preview_state = get_staff_preview_state(self.request)
+
+        if user.is_global_master and not preview_state["preview_mode"]:
             context.update(
                 {
                     "master_mode": True,
@@ -30,8 +43,7 @@ class DashboardHomeView(LoginRequiredMixin, TemplateView):
             )
             return context
 
-        tenant = user.tenant
-        preview_state = get_staff_preview_state(self.request)
+        tenant = self.request.tenant or user.tenant
         queryset = Atendimento.objects.filter(tenant=tenant)
         fila = fila_inteligente_queryset(tenant)[:8]
         agora_chamando = queryset.filter(status=Atendimento.Status.CHAMADO).select_related("guiche").order_by("-chamado_em").first()
@@ -65,4 +77,3 @@ class DashboardHomeView(LoginRequiredMixin, TemplateView):
             }
         )
         return context
-

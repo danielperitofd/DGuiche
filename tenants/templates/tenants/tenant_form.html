@@ -1,24 +1,43 @@
 ﻿{% extends 'base.html' %}
 {% block title %}Tenant | AgendM{% endblock %}
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-12 col-xl-7">
-        <div class="card border-0 shadow-sm"><div class="card-body p-4">
-            <h1 class="h4 mb-4">Cadastro de tenant</h1>
-            <form method="post" class="row g-3">{% csrf_token %}
-                {% for field in form %}
-                <div class="col-md-6 {% if field.name == 'descricao' %}col-12{% endif %}">
-                    <label class="form-label">{{ field.label }}</label>
-                    {{ field }}
+<div class="row justify-content-center row-tight">
+    <div class="col-12 col-xl-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="section-header mb-3">
+                    <div>
+                        <h1 class="section-title">Cadastro de tenant</h1>
+                        <p class="section-subtitle">Configuração institucional, status e política de auto cadastro.</p>
+                    </div>
                 </div>
-                {% endfor %}
-                <div class="col-12 d-flex justify-content-end gap-2">
-                    <a href="{% url 'tenants:list' %}" class="btn btn-outline-secondary">Cancelar</a>
-                    <button class="btn btn-success"><i class="bi bi-check2"></i> Salvar</button>
-                </div>
-            </form>
-        </div></div>
+                <form method="post" class="row g-3 row-tight">{% csrf_token %}
+                    {% for field in form %}
+                    <div class="col-md-6 {% if field.name == 'descricao' %}col-12{% endif %} {% if field.name == 'cadastro_publico_ativo' %}col-12{% endif %}">
+                        {% if field.name == 'cadastro_publico_ativo' %}
+                        <div class="tenant-toggle-card">
+                            <div>
+                                <label class="form-label mb-1">{{ field.label }}</label>
+                                <div class="form-hint">Permite exibir o botão “Criar conta” para esta tenant na tela pública de login.</div>
+                            </div>
+                            <div class="form-check form-switch m-0">
+                                {{ field }}
+                            </div>
+                        </div>
+                        {% else %}
+                        <label class="form-label">{{ field.label }}</label>
+                        {{ field }}
+                        {% endif %}
+                        {% if field.errors %}<div class="text-danger small mt-1">{{ field.errors|join:', ' }}</div>{% endif %}
+                    </div>
+                    {% endfor %}
+                    <div class="col-12 d-flex justify-content-end gap-2">
+                        <a href="{% url 'tenants:list' %}" class="btn btn-outline-secondary">Cancelar</a>
+                        <button class="btn btn-success"><i class="bi bi-check2"></i> Salvar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}
-
